@@ -1,7 +1,8 @@
 
-
+# ------------------- requirements.txt -------------------
 streamlit
 fpdf
 pandas
+qrcode[pil]
 
 spacy
