@@ -2,12 +2,8 @@ import streamlit as st
 from fpdf import FPDF
 import spacy
 
-# ------------------- Load NLP Model -------------------
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    import en_core_web_sm
-    nlp = en_core_web_sm.load()
+# ------------------- Load spaCy Model -------------------
+nlp = spacy.load("en_core_web_sm")
 
 # ------------------- Page Setup -------------------
 st.set_page_config(page_title="AI Resume Builder", layout="wide")
@@ -114,3 +110,5 @@ if submitted:
         file_name=f"{name.replace(' ', '_')}_AI_Resume.pdf",
         mime="application/pdf"
     )
+
+    
