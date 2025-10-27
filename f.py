@@ -2,14 +2,17 @@ import streamlit as st
 from fpdf import FPDF
 import spacy
 
-
-# ------------------- Load NLP Tools -------------------
-nlp = spacy.load('en_core_web_sm')
+# ------------------- Load NLP Model -------------------
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    import en_core_web_sm
+    nlp = en_core_web_sm.load()
 
 # ------------------- Page Setup -------------------
 st.set_page_config(page_title="AI Resume Builder", layout="wide")
-st.title("AI Resume Builder with Smart AI Features")
-st.write("Fill out your details to generate a professional resume. Skills and experiences will be enhanced automatically.")
+st.title("AI Resume Builder with AI Features")
+st.write("Fill out your details to generate a professional resume with AI skill suggestions and bullet points.")
 
 # ------------------- User Input Form -------------------
 with st.form("resume_form"):
@@ -47,19 +50,12 @@ def suggest_skills(text):
             extracted.add(token.text)
     return extracted
 
-def grammar_correct(text):
-    """Correct text grammar using language_tool_python"""
-    matches = tool.check(text)
-    corrected = language_tool_python.utils.correct(text, matches)
-    return corrected
-
 def auto_bullet_points(text):
-    """Split by lines, correct grammar, and prefix with dash"""
+    """Split by lines and prefix with dash"""
     bullets = []
     for line in text.split('\n'):
         line = line.strip()
         if line:
-            line = grammar_correct(line)
             bullets.append(f"- {line}")
     return '\n'.join(bullets)
 
