@@ -2,8 +2,7 @@ import streamlit as st
 from fpdf import FPDF
 import spacy
 
-# ------------------- Load spaCy Model -------------------
-nlp = spacy.load("en_core_web_sm")
+
 
 # ------------------- Page Setup -------------------
 st.set_page_config(page_title="AI Resume Builder", layout="wide")
