@@ -1,7 +1,6 @@
 import streamlit as st
 from fpdf import FPDF
 import qrcode
-from io import BytesIO
 
 # ------------------- Page Setup -------------------
 st.set_page_config(page_title="AI Resume Builder", layout="wide")
@@ -83,17 +82,15 @@ if submitted:
         add_section("Achievements", achievements)
 
     # ------------------- Add QR Codes -------------------
-    qr_buffer = BytesIO()
-    qr = qrcode.QRCode(box_size=2, border=1)
     if linkedin.strip():
+        qr = qrcode.QRCode(box_size=2, border=1)
         qr.add_data(linkedin)
         qr.make(fit=True)
         img = qr.make_image(fill_color="black", back_color="white")
-        img.save(qr_buffer)
-        pdf.image(qr_buffer, x=10, y=pdf.get_y(), w=25)
+        qr_temp_path = "linkedin_qr.png"
+        img.save(qr_temp_path)
+        pdf.image(qr_temp_path, x=10, y=pdf.get_y(), w=25)
         pdf.ln(30)
-        qr_buffer.seek(0)
-    qr_buffer.close()
 
     # ------------------- Generate PDF as bytes -------------------
     pdf_bytes = pdf.output(dest='S').encode('latin-1')
@@ -105,4 +102,3 @@ if submitted:
         file_name=f"{name.replace(' ', '_')}_Resume.pdf",
         mime="application/pdf"
     )
-
