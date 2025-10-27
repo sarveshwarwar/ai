@@ -14,7 +14,7 @@ with st.form("resume_form"):
     phone = st.text_input("Phone")
     linkedin = st.text_input("LinkedIn URL")
     github = st.text_input("GitHub URL")
-    
+
     st.subheader("Education")
     education = st.text_area("List your degrees / certifications (one per line)")
 
@@ -32,7 +32,7 @@ if submitted:
     pdf.add_page()
     pdf.set_font("Arial", 'B', 24)
     pdf.cell(0, 10, name, ln=True, align='C')
-    
+
     pdf.set_font("Arial", '', 12)
     pdf.cell(0, 8, f"Email: {email} | Phone: {phone}", ln=True, align='C')
     pdf.cell(0, 8, f"LinkedIn: {linkedin} | GitHub: {github}", ln=True, align='C')
@@ -61,9 +61,13 @@ if submitted:
     for line in experience.split('\n'):
         pdf.multi_cell(0, 8, f"- {line}")
 
-    # Save PDF
-    pdf_file = f"{name.replace(' ', '_')}_Resume.pdf"
-    pdf.output(pdf_file)
+    # Convert PDF to bytes for Streamlit download
+    pdf_bytes = pdf.output(dest='S').encode('latin-1')
 
     st.success("✅ Resume generated successfully!")
-    st.download_button("Download Resume PDF", pdf_file, file_name=pdf_file, mime="application/pdf")
+    st.download_button(
+        label="Download Resume PDF",
+        data=pdf_bytes,
+        file_name=f"{name.replace(' ', '_')}_Resume.pdf",
+        mime="application/pdf")
+    
