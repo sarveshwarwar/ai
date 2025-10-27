@@ -1,3 +1,5 @@
-streamlit
-fpdf
-spacy
+streamlit>=1.25.0
+openai
+pdfminer.six
+python-docx
+reportlab
