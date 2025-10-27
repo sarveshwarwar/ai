@@ -4,8 +4,8 @@ import qrcode
 
 # ------------------- Page Setup -------------------
 st.set_page_config(page_title="AI Resume Builder", layout="wide")
-st.title("🎨 AI Resume Builder - Colorful & Feature-Rich")
-st.write("Fill out your details to generate a professional, colorful resume.")
+st.title("AI Resume Builder")
+st.write("Fill out your details to generate a professional resume.")
 
 # ------------------- User Input Form -------------------
 with st.form("resume_form"):
@@ -38,34 +38,28 @@ if submitted:
     pdf = FPDF()
     pdf.add_page()
 
-    # ------------------- Header -------------------
-    pdf.set_fill_color(0, 102, 204)  # Blue header
-    pdf.set_text_color(255, 255, 255)
-    pdf.set_font("Arial", 'B', 26)
-    pdf.cell(0, 15, name, ln=True, align='C', fill=True)
+    # Header
+    pdf.set_font("Arial", 'B', 24)
+    pdf.cell(0, 15, name, ln=True, align='C')
     pdf.ln(5)
 
-    pdf.set_text_color(0, 0, 0)
     pdf.set_font("Arial", '', 12)
     pdf.cell(0, 8, f"Email: {email} | Phone: {phone}", ln=True, align='C')
     pdf.cell(0, 8, f"LinkedIn: {linkedin} | GitHub: {github}", ln=True, align='C')
     pdf.ln(10)
 
-    # ------------------- Function to add sections -------------------
+    # Function to add sections
     def add_section(title, content_lines):
-        pdf.set_fill_color(0, 102, 204)
-        pdf.set_text_color(255, 255, 255)
         pdf.set_font("Arial", 'B', 16)
-        pdf.cell(0, 8, title, ln=True, fill=True)
+        pdf.cell(0, 8, title, ln=True)
         pdf.ln(2)
-        pdf.set_text_color(0, 0, 0)
         pdf.set_font("Arial", '', 12)
         for line in content_lines.split('\n'):
             if line.strip():
                 pdf.multi_cell(0, 8, f"- {line}")
         pdf.ln(3)
 
-    # ------------------- Sections -------------------
+    # Sections
     if education.strip():
         add_section("Education", education)
 
@@ -81,7 +75,7 @@ if submitted:
     if achievements.strip():
         add_section("Achievements", achievements)
 
-    # ------------------- Add QR Codes -------------------
+    # QR Codes
     if linkedin.strip():
         qr = qrcode.QRCode(box_size=2, border=1)
         qr.add_data(linkedin)
@@ -92,12 +86,12 @@ if submitted:
         pdf.image(qr_temp_path, x=10, y=pdf.get_y(), w=25)
         pdf.ln(30)
 
-    # ------------------- Generate PDF as bytes -------------------
+    # Generate PDF as bytes
     pdf_bytes = pdf.output(dest='S').encode('latin-1')
 
     st.success("✅ Resume generated successfully!")
     st.download_button(
-        label="Download Colorful Resume PDF",
+        label="Download Resume PDF",
         data=pdf_bytes,
         file_name=f"{name.replace(' ', '_')}_Resume.pdf",
         mime="application/pdf"
