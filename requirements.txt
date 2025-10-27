@@ -6,3 +6,7 @@ pandas
 qrcode[pil]
 
 spacy
+language_tool_python
+spacy
+en_core_web_sm
+
