@@ -1,10 +1,16 @@
 import streamlit as st
 from fpdf import FPDF
+import spacy
+import language_tool_python
+
+# ------------------- Load NLP Tools -------------------
+nlp = spacy.load('en_core_web_sm')
+tool = language_tool_python.LanguageTool('en-US')
 
 # ------------------- Page Setup -------------------
 st.set_page_config(page_title="AI Resume Builder", layout="wide")
-st.title("AI Resume Builder")
-st.write("Fill out your details to generate a professional resume.")
+st.title("AI Resume Builder with Smart AI Features")
+st.write("Fill out your details to generate a professional resume. Skills and experiences will be enhanced automatically.")
 
 # ------------------- User Input Form -------------------
 with st.form("resume_form"):
@@ -18,11 +24,11 @@ with st.form("resume_form"):
     st.subheader("Education")
     education = st.text_area("List your degrees / certifications (one per line)")
 
-    st.subheader("Skills")
+    st.subheader("Skills (Optional)")
     skills = st.text_area("List your skills (comma separated)")
 
     st.subheader("Projects")
-    projects = st.text_area("List your projects (one per line)")
+    projects = st.text_area("Describe your projects (one per line)")
 
     st.subheader("Experience")
     experience = st.text_area("Describe your work experience")
@@ -31,6 +37,32 @@ with st.form("resume_form"):
     achievements = st.text_area("List your achievements (one per line)")
 
     submitted = st.form_submit_button("Generate Resume")
+
+# ------------------- AI Helper Functions -------------------
+def suggest_skills(text):
+    """Extract nouns/proper nouns as suggested skills"""
+    doc = nlp(text)
+    extracted = set()
+    for token in doc:
+        if token.pos_ in ['NOUN', 'PROPN']:
+            extracted.add(token.text)
+    return extracted
+
+def grammar_correct(text):
+    """Correct text grammar using language_tool_python"""
+    matches = tool.check(text)
+    corrected = language_tool_python.utils.correct(text, matches)
+    return corrected
+
+def auto_bullet_points(text):
+    """Split by lines, correct grammar, and prefix with dash"""
+    bullets = []
+    for line in text.split('\n'):
+        line = line.strip()
+        if line:
+            line = grammar_correct(line)
+            bullets.append(f"- {line}")
+    return '\n'.join(bullets)
 
 # ------------------- PDF Generation -------------------
 if submitted:
@@ -41,7 +73,6 @@ if submitted:
     pdf.set_font("Arial", 'B', 24)
     pdf.cell(0, 15, name, ln=True, align='C')
     pdf.ln(5)
-
     pdf.set_font("Arial", '', 12)
     pdf.cell(0, 8, f"Email: {email} | Phone: {phone}", ln=True, align='C')
     pdf.cell(0, 8, f"LinkedIn: {linkedin} | GitHub: {github}", ln=True, align='C')
@@ -53,34 +84,38 @@ if submitted:
         pdf.cell(0, 8, title, ln=True)
         pdf.ln(2)
         pdf.set_font("Arial", '', 12)
-        for line in content_lines.split('\n'):
-            if line.strip():
-                pdf.multi_cell(0, 8, f"- {line}")
+        pdf.multi_cell(0, 8, content_lines)
         pdf.ln(3)
 
-    # Sections
-    if education.strip():
-        add_section("Education", education)
-
-    if skills.strip():
-        add_section("Skills", ', '.join([s.strip() for s in skills.split(',')]))
-
-    if projects.strip():
-        add_section("Projects", projects)
-
+    # ------------------- AI Skill Suggestion -------------------
+    ai_skills = set()
     if experience.strip():
-        add_section("Experience", experience)
+        ai_skills |= suggest_skills(experience)
+    if projects.strip():
+        ai_skills |= suggest_skills(projects)
+    if skills.strip():
+        ai_skills |= set([s.strip() for s in skills.split(',')])
+    skills_text = ', '.join(sorted(ai_skills))
 
+    # ------------------- Sections with AI Enhancement -------------------
+    if education.strip():
+        add_section("Education", auto_bullet_points(education))
+    if skills_text:
+        add_section("Skills", skills_text)
+    if projects.strip():
+        add_section("Projects", auto_bullet_points(projects))
+    if experience.strip():
+        add_section("Experience", auto_bullet_points(experience))
     if achievements.strip():
-        add_section("Achievements", achievements)
+        add_section("Achievements", auto_bullet_points(achievements))
 
     # Generate PDF as bytes
     pdf_bytes = pdf.output(dest='S').encode('latin-1')
 
-    st.success("✅ Resume generated successfully!")
+    st.success("✅ Resume generated successfully with AI enhancements!")
     st.download_button(
-        label="Download Resume PDF",
+        label="Download AI-Enhanced Resume PDF",
         data=pdf_bytes,
-        file_name=f"{name.replace(' ', '_')}_Resume.pdf",
+        file_name=f"{name.replace(' ', '_')}_AI_Resume.pdf",
         mime="application/pdf"
     )
