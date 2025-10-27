@@ -1,11 +1,10 @@
 import streamlit as st
 from fpdf import FPDF
 import spacy
-import language_tool_python
+
 
 # ------------------- Load NLP Tools -------------------
 nlp = spacy.load('en_core_web_sm')
-tool = language_tool_python.LanguageTool('en-US')
 
 # ------------------- Page Setup -------------------
 st.set_page_config(page_title="AI Resume Builder", layout="wide")
